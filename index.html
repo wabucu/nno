@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ННО Тренажер">
+<link rel="manifest" href="manifest.json">
+<title>ННО Тренажер</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f1a;
+    --bg2: #16162a;
+    --bg3: #1e1e35;
+    --card: #1e1e35;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f0f8;
+    --muted: rgba(240,240,248,0.5);
+    --accent: #7c6ff7;
+    --accent2: #5cc8a8;
+    --accent3: #f77c6f;
+    --radius: 16px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  .screen { display: none; min-height: 100vh; min-height: 100dvh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 16px 20px 12px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .back-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--bg3); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text); font-size: 18px; flex-shrink: 0;
+  }
+  .header-title { font-family: 'Unbounded', sans-serif; font-size: 14px; font-weight: 600; }
+
+  /* ── HOME ── */
+  .home-header {
+    padding: 48px 24px 24px;
+    background: linear-gradient(180deg, #1a1a35 0%, var(--bg) 100%);
+  }
+  .logo { font-family: 'Unbounded', sans-serif; font-size: 22px; font-weight: 700; }
+  .logo span { color: var(--accent); }
+  .tagline { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  .key-input-wrap {
+    margin: 0 24px 24px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .key-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .key-row { display: flex; gap: 8px; }
+  .key-input {
+    flex: 1; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: 13px; padding: 8px 12px; outline: none;
+  }
+  .key-input:focus { border-color: var(--accent); }
+  .key-save {
+    background: var(--accent); border: none; border-radius: 10px;
+    color: white; font-family: 'Nunito', sans-serif; font-size: 13px;
+    font-weight: 600; padding: 8px 16px; cursor: pointer;
+  }
+  .key-save:active { opacity: 0.8; }
+  .key-status { font-size: 11px; margin-top: 6px; }
+  .key-status.ok { color: var(--accent2); }
+  .key-status.no { color: var(--accent3); }
+
+  .section-title {
+    font-family: 'Unbounded', sans-serif; font-size: 11px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0 24px; margin-bottom: 12px;
+  }
+  .cards { padding: 0 24px; display: flex; flex-direction: column; gap: 12px; }
+  .mode-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    cursor: pointer; transition: transform 0.1s, border-color 0.2s;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .mode-card:active { transform: scale(0.97); }
+  .mode-card.purple { border-left: 3px solid var(--accent); }
+  .mode-card.teal { border-left: 3px solid var(--accent2); }
+  .mode-card.coral { border-left: 3px solid var(--accent3); }
+  .mode-card.history { border-left: 3px solid #f7c96f; }
+  .mode-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .mode-icon.purple { background: rgba(124,111,247,0.15); }
+  .mode-icon.teal { background: rgba(92,200,168,0.15); }
+  .mode-icon.coral { background: rgba(247,124,111,0.15); }
+  .mode-icon.history { background: rgba(247,201,111,0.15); }
+  .mode-info { flex: 1; }
+  .mode-name { font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .mode-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .mode-arrow { color: var(--muted); font-size: 18px; }
+
+  /* ── TOPIC SELECTION ── */
+  .topic-screen .content { flex: 1; overflow-y: auto; padding: 20px 20px 40px; }
+  .topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .topic-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 16px;
+    cursor: pointer; transition: transform 0.1s, border-color 0.2s;
+    text-align: center;
+  }
+  .topic-card:active { transform: scale(0.95); }
+  .topic-card:hover { border-color: var(--accent); }
+  .topic-emoji { font-size: 28px; margin-bottom: 10px; }
+  .topic-name { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .topic-card.random {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 16px; text-align: left;
+    border-style: dashed;
+  }
+  .topic-card.random .topic-emoji { font-size: 24px; margin: 0; }
+
+  /* ── CHAT ── */
+  .chat-screen { background: var(--bg); }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px 16px 8px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .msg {
+    max-width: 85%; padding: 12px 16px;
+    border-radius: 16px; font-size: 14px; line-height: 1.55;
+    animation: fadeUp 0.2s ease;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .msg.bot {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-bottom-left-radius: 4px; align-self: flex-start;
+  }
+  .msg.user {
+    background: var(--accent); color: white;
+    border-bottom-right-radius: 4px; align-self: flex-end;
+  }
+  .msg.system {
+    background: rgba(92,200,168,0.1); border: 1px solid rgba(92,200,168,0.2);
+    color: var(--accent2); font-size: 12px; align-self: center;
+    border-radius: 10px; padding: 8px 14px; max-width: 90%; text-align: center;
+  }
+  .typing-indicator {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-bottom-left-radius: 4px; padding: 14px 18px;
+    align-self: flex-start; border-radius: 16px;
+    display: flex; gap: 5px; align-items: center;
+  }
+  .typing-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--muted); animation: typingBounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce { 0%,60%,100% { transform: none; } 30% { transform: translateY(-5px); } }
+
+  .chat-input-wrap {
+    padding: 10px 16px calc(10px + var(--safe-bottom));
+    background: var(--bg2); border-top: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: flex-end;
+  }
+  .chat-input {
+    flex: 1; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 14px; color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: 14px; padding: 10px 14px; outline: none; resize: none;
+    max-height: 120px; line-height: 1.4;
+    scrollbar-width: none;
+  }
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-input::placeholder { color: var(--muted); }
+  .send-btn {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--accent); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: opacity 0.1s;
+  }
+  .send-btn:disabled { opacity: 0.4; }
+  .send-btn:active { opacity: 0.8; }
+  .send-btn svg { width: 18px; height: 18px; fill: white; }
+
+  /* ── HELP MODE ── */
+  .help-screen .content { flex: 1; overflow-y: auto; padding: 20px; }
+  .help-tabs {
+    display: flex; gap: 8px; margin-bottom: 20px;
+    background: var(--bg3); padding: 4px; border-radius: 12px;
+  }
+  .help-tab {
+    flex: 1; padding: 8px; border-radius: 9px; border: none;
+    background: transparent; color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .help-tab.active { background: var(--accent); color: white; }
+  .help-textarea {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: 14px; padding: 14px 16px; outline: none; resize: none;
+    line-height: 1.5; min-height: 130px;
+  }
+  .help-textarea:focus { border-color: var(--accent); }
+  .help-textarea::placeholder { color: var(--muted); }
+  .help-submit {
+    width: 100%; margin-top: 12px; padding: 14px;
+    background: var(--accent); border: none; border-radius: var(--radius);
+    color: white; font-family: 'Unbounded', sans-serif; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: opacity 0.1s;
+  }
+  .help-submit:disabled { opacity: 0.4; }
+  .help-submit:active { opacity: 0.8; }
+  .help-result {
+    margin-top: 20px; background: var(--bg3);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; font-size: 14px; line-height: 1.6;
+    white-space: pre-wrap; display: none;
+  }
+  .help-result.visible { display: block; animation: fadeUp 0.2s ease; }
+  .help-tips { margin-top: 8px; }
+  .tip { font-size: 12px; color: var(--muted); margin-bottom: 6px; padding-left: 12px; position: relative; }
+  .tip::before { content: '•'; position: absolute; left: 0; }
+
+  /* ── HISTORY ── */
+  .history-screen .content { flex: 1; overflow-y: auto; padding: 16px; }
+  .history-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 14px; }
+  .history-empty .big { font-size: 40px; margin-bottom: 16px; }
+  .session-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .session-card:hover { border-color: var(--accent); }
+  .session-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .session-mode { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .session-mode.train { color: var(--accent); }
+  .session-mode.prepare { color: var(--accent2); }
+  .session-mode.help { color: var(--accent2); }
+  .session-mode.decode { color: var(--accent3); }
+  .session-date { font-size: 11px; color: var(--muted); }
+  .session-preview { font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .session-msgs { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .clear-btn {
+    margin: 16px; padding: 12px; width: calc(100% - 32px);
+    background: transparent; border: 1px solid rgba(247,124,111,0.3);
+    border-radius: 12px; color: var(--accent3); font-family: 'Nunito', sans-serif;
+    font-size: 13px; cursor: pointer;
+  }
+  .clear-btn:active { background: rgba(247,124,111,0.08); }
+
+  .scroll-bottom { padding-bottom: 8px; }
+  .nno-hint {
+    background: rgba(124,111,247,0.08); border: 1px solid rgba(124,111,247,0.2);
+    border-radius: 12px; padding: 10px 14px; margin: 4px 16px 4px;
+    font-size: 11px; color: rgba(124,111,247,0.9); line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════ HOME ════════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <div class="logo">ННО<span>.</span>тренажер</div>
+    <div class="tagline">Учись говорить без конфликтов —<br>тренируйся, получай помощь, расти</div>
+  </div>
+
+  <div class="key-input-wrap">
+    <div class="key-label">OpenRouter API ключ</div>
+    <div class="key-row">
+      <input class="key-input" id="api-key-input" type="password" placeholder="sk-or-v1-...">
+      <button class="key-save" onclick="saveKey()">Сохранить</button>
+    </div>
+    <div class="key-status" id="key-status"></div>
+  </div>
+
+  <div class="section-title">Режимы</div>
+  <div class="cards">
+    <div class="mode-card purple" onclick="showTopics()">
+      <div class="mode-icon purple">🧠</div>
+      <div class="mode-info">
+        <div class="mode-name">Спарринг</div>
+        <div class="mode-desc">Тренируй навыки ННО в живом диалоге с обратной связью</div>
+      </div>
+      <div class="mode-arrow">›</div>
+    </div>
+    <div class="mode-card teal" onclick="showHelp('prepare')">
+      <div class="mode-icon teal">⚡</div>
+      <div class="mode-info">
+        <div class="mode-name">Подготовиться к разговору</div>
+        <div class="mode-desc">Опиши ситуацию — получи готовые фразы</div>
+      </div>
+      <div class="mode-arrow">›</div>
+    </div>
+    <div class="mode-card coral" onclick="showHelp('decode')">
+      <div class="mode-icon coral">📩</div>
+      <div class="mode-info">
+        <div class="mode-name">Расшифровать сообщение</div>
+        <div class="mode-desc">Вставь чужой текст — пойму, что за ним стоит</div>
+      </div>
+      <div class="mode-arrow">›</div>
+    </div>
+    <div class="mode-card history" onclick="showHistory()">
+      <div class="mode-icon history">📋</div>
+      <div class="mode-info">
+        <div class="mode-name">История сессий</div>
+        <div class="mode-desc">Прошлые диалоги и разборы</div>
+      </div>
+      <div class="mode-arrow">›</div>
+    </div>
+  </div>
+  <div style="height: 40px;"></div>
+</div>
+
+<!-- ════════ TOPICS ════════ -->
+<div id="screen-topics" class="screen topic-screen">
+  <div class="header">
+    <button class="back-btn" onclick="goHome()">‹</button>
+    <div class="header-title">Выбери тему</div>
+  </div>
+  <div class="content">
+    <div class="nno-hint">Я буду играть роль собеседника и давать обратную связь после каждого ответа</div>
+    <div style="height:12px;"></div>
+    <div class="topic-grid">
+      <div class="topic-card" onclick="startTrain('work')">
+        <div class="topic-emoji">👔</div>
+        <div class="topic-name">Рабочий конфликт</div>
+      </div>
+      <div class="topic-card" onclick="startTrain('partner')">
+        <div class="topic-emoji">❤️</div>
+        <div class="topic-name">Отношения / партнёр</div>
+      </div>
+      <div class="topic-card" onclick="startTrain('family')">
+        <div class="topic-emoji">👪</div>
+        <div class="topic-name">Родители / семья</div>
+      </div>
+      <div class="topic-card" onclick="startTrain('friend')">
+        <div class="topic-emoji">🤝</div>
+        <div class="topic-name">Друг / знакомый</div>
+      </div>
+      <div class="topic-card random" onclick="startTrain('random')">
+        <div class="topic-emoji">🎲</div>
+        <div class="topic-name">Случайная ситуация — удиви меня</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ CHAT (TRAIN) ════════ -->
+<div id="screen-chat" class="screen chat-screen">
+  <div class="header">
+    <button class="back-btn" onclick="goHome()">‹</button>
+    <div class="header-title" id="chat-title">Спарринг</div>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-wrap">
+    <textarea class="chat-input" id="chat-input" rows="1" placeholder="Твой ответ..." onkeydown="chatKeyDown(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ════════ HELP ════════ -->
+<div id="screen-help" class="screen help-screen">
+  <div class="header">
+    <button class="back-btn" onclick="goHome()">‹</button>
+    <div class="header-title" id="help-title">Помощь</div>
+  </div>
+  <div class="content">
+    <div class="help-tabs">
+      <button class="help-tab active" id="tab-prepare" onclick="switchTab('prepare')">Подготовиться</button>
+      <button class="help-tab" id="tab-decode" onclick="switchTab('decode')">Расшифровать</button>
+    </div>
+    <div id="help-prepare-block">
+      <div class="help-tips">
+        <div class="tip">С кем предстоит разговор?</div>
+        <div class="tip">О чём ты хочешь сказать?</div>
+        <div class="tip">Что чувствуешь? Чего хочешь добиться?</div>
+      </div>
+      <div style="height:10px;"></div>
+      <textarea class="help-textarea" id="prepare-input" placeholder="Опиши ситуацию как можно подробнее..."></textarea>
+      <button class="help-submit" id="prepare-btn" onclick="submitHelp('prepare')">Помоги подготовиться →</button>
+    </div>
+    <div id="help-decode-block" style="display:none;">
+      <div class="help-tips">
+        <div class="tip">Вставь сообщение дословно</div>
+        <div class="tip">Можно несколько сообщений подряд</div>
+      </div>
+      <div style="height:10px;"></div>
+      <textarea class="help-textarea" id="decode-input" placeholder="Вставь сообщение собеседника сюда..."></textarea>
+      <button class="help-submit" id="decode-btn" onclick="submitHelp('decode')">Расшифровать →</button>
+    </div>
+    <div class="help-result" id="help-result"></div>
+  </div>
+</div>
+
+<!-- ════════ HISTORY ════════ -->
+<div id="screen-history" class="screen history-screen">
+  <div class="header">
+    <button class="back-btn" onclick="goHome()">‹</button>
+    <div class="header-title">История сессий</div>
+  </div>
+  <div class="content" id="history-content"></div>
+  <button class="clear-btn" onclick="clearHistory()">Очистить историю</button>
+</div>
+
+<script>
+const SYSTEM_TRAINER = `Ты — тренер по Ненасильственному Общению (ННО).
+Ты играешь роль собеседника в конфликтной ситуации — говори эмоционально, живо, как реальный человек.
+После КАЖДОГО ответа пользователя:
+1. Сначала отреагируй как персонаж (2-3 предложения) 
+2. Затем на новой строке напиши разбор через символ "---"
+   - Если хорошо: коротко похвали и назови что сработало (наблюдение/чувство/потребность/просьба)
+   - Если есть ошибки: мягко укажи — оценка, интерпретация, требование? — и попроси переформулировать
+Будь тёплым, поддерживающим, честным. ТОЛЬКО НА РУССКОМ.`;
+
+const SYSTEM_HELPER = `Ты — помощник по ННО для реальных жизненных ситуаций. ТОЛЬКО НА РУССКОМ ЯЗЫКЕ.`;
+
+const SCENES = {
+  work: "Твой коллега говорит раздражённо: «Слушай, у меня аврал. Сделай за меня этот отчёт, ладно? Ты же быстро справишься, а у меня куча всего навалилось.»",
+  partner: "Партнёр после тяжёлого дня бросает: «Ты опять за своё? Вечно тебе что-то надо. Дай просто отдохнуть!»",
+  family: "Мама звонит и говорит обиженно: «Ты совсем про нас забыл. Не звонишь, не приезжаешь. Мы для тебя больше не существуем?»",
+  friend: "Друг пишет: «Ты снова не пришёл. Я уже не знаю, зачем вообще тебя звать. Такое ощущение, что тебе на нас плевать.»",
+};
+
+let state = {
+  apiKey: localStorage.getItem('nno_api_key') || '',
+  chatHistory: [],
+  currentMode: '',
+  currentTopic: '',
+  sessions: JSON.parse(localStorage.getItem('nno_sessions') || '[]'),
+};
+
+function $(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() { showScreen('screen-home'); }
+function showTopics() {
+  if (!checkKey()) return;
+  showScreen('screen-topics');
+}
+function showHelp(tab) {
+  if (!checkKey()) return;
+  showScreen('screen-help');
+  switchTab(tab || 'prepare');
+  $('help-result').classList.remove('visible');
+  $('help-result').textContent = '';
+}
+function showHistory() {
+  renderHistory();
+  showScreen('screen-history');
+}
+
+function checkKey() {
+  if (!state.apiKey) {
+    alert('Сначала введи OpenRouter API ключ в поле на главном экране.\n\nПолучить бесплатно: openrouter.ai → Sign In → API Keys');
+    return false;
+  }
+  return true;
+}
+
+function saveKey() {
+  const val = $('api-key-input').value.trim();
+  if (!val || val === '••••••••••••••••') return;
+  state.apiKey = val;
+  localStorage.setItem('nno_api_key', val);
+  $('key-status').className = 'key-status ok';
+  $('key-status').textContent = '✓ Ключ сохранён';
+  $('api-key-input').value = '••••••••••••••••';
+}
+
+window.addEventListener('load', () => {
+  if (state.apiKey) {
+    $('api-key-input').value = '••••••••••••••••';
+    $('key-status').className = 'key-status ok';
+    $('key-status').textContent = '✓ Ключ сохранён';
+  } else {
+    $('key-status').className = 'key-status no';
+    $('key-status').textContent = 'Ключ не задан — получи на openrouter.ai';
+  }
+});
+
+async function callAI(messages) {
+  if (!state.apiKey) return '😔 API ключ не задан. Введи ключ на главном экране.';
+  try {
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + state.apiKey,
+        'HTTP-Referer': 'https://wabucu.github.io',
+        'X-Title': 'NNO Trainer',
+      },
+      body: JSON.stringify({
+        models: [
+          'meta-llama/llama-3.3-70b-instruct:free',
+          'deepseek/deepseek-chat-v3-0324:free',
+          'google/gemini-2.0-flash-exp:free',
+        ],
+        route: 'fallback',
+        messages: messages,
+        max_tokens: 1000,
+        temperature: 0.7,
+      }),
+    });
+    if (resp.status === 401) return '😔 Неверный API ключ. Проверь ключ на openrouter.ai → API Keys.';
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      const errMsg = (errData && errData.error && (errData.error.message || errData.error)) || ('HTTP ' + resp.status);
+      console.error('API error:', resp.status, errMsg);
+      return '😔 Ошибка API (' + resp.status + '): ' + errMsg;
+    }
+    const data = await resp.json();
+    if (data.choices && data.choices[0]) return data.choices[0].message.content;
+    return '😔 Не удалось получить ответ. Попробуй ещё раз.';
+  } catch(e) {
+    console.error('Network error:', e);
+    return '😔 Ошибка соединения с openrouter.ai. Проверь интернет и попробуй снова.';
+  }
+}
+
+// ── TRAIN ──
+async function startTrain(topic) {
+  state.currentMode = 'train';
+  state.currentTopic = topic;
+  state.chatHistory = [{ role: 'system', content: SYSTEM_TRAINER }];
+
+  const titles = { work: '👔 Рабочий конфликт', partner: '❤️ Отношения', family: '👪 Семья', friend: '🤝 Друг', random: '🎲 Случайная' };
+  $('chat-title').textContent = titles[topic] || 'Спарринг';
+  $('chat-messages').innerHTML = '';
+  showScreen('screen-chat');
+
+  if (topic === 'random') {
+    showTyping();
+    const sceneReq = [{ role: 'user', content: 'Создай одну короткую бытовую ситуацию (2-3 предложения) для тренировки ННО. Напиши только реплику раздражённого собеседника, без пояснений. На русском.' }];
+    const scene = await callAI(sceneReq);
+    hideTyping();
+    addBotMessage(scene);
+    state.chatHistory.push({ role: 'assistant', content: scene });
+  } else {
+    const scene = SCENES[topic];
+    addBotMessage(scene);
+    state.chatHistory.push({ role: 'assistant', content: scene });
+  }
+  addSystemMessage('💡 Отвечай используя ННО: наблюдение → чувство → потребность → просьба');
+}
+
+async function sendMessage() {
+  const input = $('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = '';
+
+  $('send-btn').disabled = true;
+  addUserMessage(text);
+
+  const msgs = [...state.chatHistory, { role: 'user', content: text }];
+  // Append instruction for model to both react as character and give NVC analysis
+  const lastUserContent = text + '\n\n[Инструкция для ИИ: Сначала отреагируй как персонаж (живо, эмоционально, 2-3 предложения). Затем с новой строки напиши "---" и дай разбор по ННО: что хорошо, что можно улучшить. Будь тёплым.]';
+  const msgsWithInstruction = [...state.chatHistory, { role: 'user', content: lastUserContent }];
+
+  showTyping();
+  const reply = await callAI(msgsWithInstruction);
+  hideTyping();
+
+  state.chatHistory.push({ role: 'user', content: text });
+  state.chatHistory.push({ role: 'assistant', content: reply });
+
+  const parts = reply.split('---');
+  if (parts.length >= 2) {
+    addBotMessage(parts[0].trim());
+    addSystemMessage('📊 ' + parts.slice(1).join('---').trim());
+  } else {
+    addBotMessage(reply);
+  }
+
+  $('send-btn').disabled = false;
+  saveSession();
+}
+
+function chatKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function addBotMessage(text) {
+  const el = document.createElement('div');
+  el.className = 'msg bot';
+  el.textContent = text;
+  $('chat-messages').appendChild(el);
+  scrollChat();
+}
+function addUserMessage(text) {
+  const el = document.createElement('div');
+  el.className = 'msg user';
+  el.textContent = text;
+  $('chat-messages').appendChild(el);
+  scrollChat();
+}
+function addSystemMessage(text) {
+  const el = document.createElement('div');
+  el.className = 'msg system';
+  el.textContent = text;
+  $('chat-messages').appendChild(el);
+  scrollChat();
+}
+
+let typingEl = null;
+function showTyping() {
+  typingEl = document.createElement('div');
+  typingEl.className = 'typing-indicator';
+  typingEl.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  $('chat-messages').appendChild(typingEl);
+  scrollChat();
+}
+function hideTyping() {
+  if (typingEl) { typingEl.remove(); typingEl = null; }
+}
+function scrollChat() {
+  const c = $('chat-messages');
+  setTimeout(() => c.scrollTop = c.scrollHeight, 50);
+}
+
+// ── HELP ──
+function switchTab(tab) {
+  $('tab-prepare').classList.toggle('active', tab === 'prepare');
+  $('tab-decode').classList.toggle('active', tab === 'decode');
+  $('help-prepare-block').style.display = tab === 'prepare' ? 'block' : 'none';
+  $('help-decode-block').style.display = tab === 'decode' ? 'block' : 'none';
+  $('help-title').textContent = tab === 'decode' ? 'Расшифровать сообщение' : 'Подготовиться к разговору';
+  $('help-result').classList.remove('visible');
+  $('help-result').textContent = '';
+  state.currentMode = tab;
+}
+
+async function submitHelp(type) {
+  const inputEl = type === 'prepare' ? $('prepare-input') : $('decode-input');
+  const btnEl = type === 'prepare' ? $('prepare-btn') : $('decode-btn');
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  btnEl.disabled = true;
+  btnEl.textContent = 'Думаю...';
+  $('help-result').classList.remove('visible');
+
+  let prompt;
+  if (type === 'prepare') {
+    prompt = `${SYSTEM_HELPER}\n\nПользователь готовится к разговору:\n"""\n${text}\n"""\n\nПомоги: 1) Разложи на 4 шага ННО: наблюдение, чувства, потребности, просьба. 2) Предложи 1-2 готовые фразы для разговора. 3) Объясни кратко почему они работают.`;
+  } else {
+    prompt = `${SYSTEM_HELPER}\n\nПользователь получил это сообщение:\n"""\n${text}\n"""\n\nПомоги: 1) Расшифруй что стоит за словами (чувства и потребности собеседника). 2) Предложи 1-2 варианта ответа. 3) Объясни логику кратко.`;
+  }
+
+  const reply = await callAI([{ role: 'user', content: prompt }]);
+  $('help-result').textContent = reply;
+  $('help-result').classList.add('visible');
+
+  btnEl.disabled = false;
+  btnEl.textContent = type === 'prepare' ? 'Помоги подготовиться →' : 'Расшифровать →';
+  saveSession(text, reply);
+
+  $('help-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── SESSIONS ──
+function saveSession(input, output) {
+  const session = {
+    id: Date.now(),
+    mode: state.currentMode,
+    topic: state.currentTopic,
+    date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+    messages: state.currentMode === 'train'
+      ? state.chatHistory.filter(m => m.role !== 'system')
+      : [{ role: 'user', content: input }, { role: 'assistant', content: output }],
+  };
+  if (session.messages.length === 0) return;
+  state.sessions.unshift(session);
+  if (state.sessions.length > 50) state.sessions = state.sessions.slice(0, 50);
+  localStorage.setItem('nno_sessions', JSON.stringify(state.sessions));
+}
+
+function renderHistory() {
+  const el = $('history-content');
+  if (!state.sessions.length) {
+    el.innerHTML = '<div class="history-empty"><div class="big">📭</div>История пока пуста.<br>Начни тренировку или воспользуйся помощью!</div>';
+    return;
+  }
+  const modeNames = { train: 'Спарринг', prepare: 'Подготовка', decode: 'Расшифровка' };
+  el.innerHTML = state.sessions.map(s => {
+    const preview = s.messages?.[0]?.content?.slice(0, 80) || '';
+    const count = s.messages?.length || 0;
+    return `<div class="session-card">
+      <div class="session-meta">
+        <span class="session-mode ${s.mode}">${modeNames[s.mode] || s.mode}</span>
+        <span class="session-date">${s.date}</span>
+      </div>
+      <div class="session-preview">${preview}${preview.length >= 80 ? '…' : ''}</div>
+      <div class="session-msgs">${count} сообщений</div>
+    </div>`;
+  }).join('');
+}
+
+function clearHistory() {
+  if (!confirm('Удалить всю историю?')) return;
+  state.sessions = [];
+  localStorage.removeItem('nno_sessions');
+  renderHistory();
+}
+</script>
+</body>
+</html>
